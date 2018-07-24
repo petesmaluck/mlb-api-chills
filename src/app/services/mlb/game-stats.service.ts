@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HttpDataService } from './http-data.service';
-import { Observable, of } from 'rxjs';
-import { concat, map, filter, mergeMap, catchError, pluck, share, tap, toArray } from 'rxjs/operators';
-
+import { concat, Observable, of } from 'rxjs';
+import { map, filter, mergeMap, catchError, pluck, share, tap, toArray } from 'rxjs/operators';
 import * as moment from 'moment';
 
 @Injectable()
@@ -25,7 +24,7 @@ export class GameStatsService {
         mergeMap((games: any) => games.dates[0].games),
         map(games => games),
         share()
-      )
+      );
   }
 
   pollTodaysGames(): Observable<any> {
@@ -35,7 +34,7 @@ export class GameStatsService {
         mergeMap((games: any) => games.dates[0].games),
         map(games => games),
         share()
-      )
+      );
   }
 
   // Utility function
@@ -44,7 +43,7 @@ export class GameStatsService {
     return this.requestTodaysGames()
       .pipe(
         pluck(...params)
-      )
+      );
   }
 
   // Game Data
@@ -54,14 +53,15 @@ export class GameStatsService {
       .pipe(
         filter(game => (game.teams.away.team.locationName === team) || (game.teams.home.team.locationName === team)),
         catchError(err => of('error found', err))
-      )
+      );
   }
 
   getLiveGames(): Observable<any> {
-    return this.pollTodaysGames().pipe(
+    return this.pollTodaysGames()
+       .pipe(
         filter(game => game.status.abstractGameState === 'Live'),
         catchError(err => of('error found', err))
-      )
+      );
   }
 
   // Probable Pitcher
@@ -70,22 +70,22 @@ export class GameStatsService {
     return this.requestTodaysGames()
       .pipe(
         pluck('teams', 'away', 'probablePitcher')
-      )
+      );
   }
 
   probableHomePitchers(): Observable<any> {
     return this.requestTodaysGames()
       .pipe(
         pluck('teams', 'home', 'probablePitcher')
-      )
+      );
   }
 
   probablePitchers(): Observable<any> {
     return this.probableAwayPitchers()
       .pipe(
-        concat(this.probableHomePitchers()),
+        concat(this.probableHomePitchers()), // TODO: Concat as a monad is depricated?
         tap(res => console.log(res))
-      )
+      );
   }
 
   // Linescores
@@ -98,8 +98,9 @@ export class GameStatsService {
   }
 
   getLinescoreByTeam(team): Observable<any> {
-    return this.todaysGameByTeam(team).pipe(
+    return this.todaysGameByTeam(team)
+      .pipe(
         pluck('linescore')
-      )
+      );
   }
 }

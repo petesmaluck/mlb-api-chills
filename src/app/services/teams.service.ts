@@ -9,7 +9,7 @@ export class TeamsService {
 
   private ROOT_URL = 'http://m.bluejays.mlb.com/shared/properties/style/';
 
-  // Search 
+  // Search
   // http://lookup-service-prod.mlb.com/json/named.player_teams.bam?player_id=446099&season=2018
 
   // Stat Key
@@ -36,26 +36,26 @@ export class TeamsService {
   ) {}
 
   requestTeamRoster$(team): Observable<any> {
-  	// Currently only returning Toronto Blue Jays data
+    // Currently only returning Toronto Blue Jays data
     return this.http.getStaticData('http://lookup-service-prod.mlb.com/json/named.roster_all.bam?roster_all.col_in=player_html&roster_all.col_in=player_id&roster_all.col_in=forty_man_sw&roster_all.col_in=status_code&team_id=%27141%27&ovrd_enc=utf-8')
       .pipe(
-      	mergeMap(res => this.teamPlayerIdsParser(res)),
-      	map(res => this.randomPlayerId(res))
-      )
+        mergeMap(res => this.teamPlayerIdsParser(res)),
+        map(res => this.randomPlayerId(res))
+      );
   }
 
-	teamPlayerIdsParser(stream) {
-		return stream.pipe(
-			pluck('roster_all', 'queryResults', 'row'),
-			mergeMap(player => player), // TODO: Look into this error
-			pluck('player_id'),
-			toArray(),
-			tap(res => console.log('player_ids: ', res))
-		)
-	}
+  teamPlayerIdsParser(stream) {
+    return stream.pipe(
+      pluck('roster_all', 'queryResults', 'row'),
+      mergeMap(player => player), // TODO: Look into this error
+      pluck('player_id'),
+      toArray(),
+      tap(res => console.log('player_ids: ', res))
+    );
+  }
 
-	randomPlayerId(arr) {
-	  const randomIndex = Math.floor(Math.random() * arr.length);
-		return arr[randomIndex];
-	}
+  randomPlayerId(arr) {
+    const randomIndex = Math.floor(Math.random() * arr.length);
+    return arr[randomIndex];
+  }
 }
