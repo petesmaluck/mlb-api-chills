@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { HttpDataService } from './http-data.service';
-import { concat, Observable, of } from 'rxjs';
-import { map, filter, mergeMap, catchError, pluck, share, tap, toArray } from 'rxjs/operators';
+import { HttpDataService } from '../util/http-data.service';
+import { Observable, of } from 'rxjs';
+import { concat, map, filter, mergeMap, catchError, pluck, share, tap, toArray } from 'rxjs/operators';
 import * as moment from 'moment';
 
 @Injectable()
@@ -18,17 +18,17 @@ export class GameStatsService {
   ) {}
 
   requestTodaysGames(): Observable<any> {
-    return this.http.getStaticData(this.ROOT_URL + 'date=' + moment().format('YYYY') + '-' + moment().format('MM') + '-' + moment().format('DD') + this.PARAMS)
+    return this.http.getStaticData(this.ROOT_URL + 'date=' + moment().format('YYYY') + '-' + moment().format('MM') + '-' + '23' + this.PARAMS)
       .pipe(
         mergeMap(games => games),
-        mergeMap((games: any) => games.dates[0].games),
+        mergeMap((games: any) => games.dates[0].games), // TODO: Setup games interface
         map(games => games),
         share()
       );
   }
 
-  pollTodaysGames(): Observable<any> {
-    return this.http.pollingData(this.ROOT_URL + 'date=' + moment().format('YYYY') + '-' + moment().format('MM') + '-' + moment().format('DD') + this.PARAMS, 10000)
+  pollTodaysGames(interval): Observable<any> {
+    return this.http.pollingData(this.ROOT_URL + 'date=' + moment().format('YYYY') + '-' + moment().format('MM') + '-' + moment().format('DD') + this.PARAMS, interval)
       .pipe(
         mergeMap(res => res),
         mergeMap((games: any) => games.dates[0].games),
@@ -57,7 +57,7 @@ export class GameStatsService {
   }
 
   getLiveGames(): Observable<any> {
-    return this.pollTodaysGames()
+    return this.pollTodaysGames(60000)
        .pipe(
         filter(game => game.status.abstractGameState === 'Live'),
         catchError(err => of('error found', err))
@@ -80,11 +80,17 @@ export class GameStatsService {
       );
   }
 
-  probablePitchers(): Observable<any> {
-    return this.probableAwayPitchers()
+  probablePitchersArray(): Observable<any> {
+    return this.requestTodaysGames()
       .pipe(
-        concat(this.probableHomePitchers()), // TODO: Concat as a monad is depricated?
-        tap(res => console.log(res))
+        pluck('teams'),
+        map((team: any) => { // TODO: Setup team interface
+          return {
+            'away': { 'teamID': team.away.team.id, 'teamName': team.away.team.name, 'pitcher': team.away.probablePitcher },
+            'home': { 'teamID': team.home.team.id, 'teamName': team.home.team.name, 'pitcher': team.home.probablePitcher }
+          }
+        }),
+        toArray()
       );
   }
 

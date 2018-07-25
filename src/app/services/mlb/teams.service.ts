@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { HttpDataService } from './mlb/http-data.service';
+import { HttpDataService } from '../util/http-data.service';
 import { Observable } from 'rxjs';
 import { share, mergeMap, map, pluck, tap, toArray } from 'rxjs/operators';
 
@@ -47,7 +47,7 @@ export class TeamsService {
   teamPlayerIdsParser(stream) {
     return stream.pipe(
       pluck('roster_all', 'queryResults', 'row'),
-      mergeMap(player => player), // TODO: Look into this error
+      // mergeMap(player => player), // TODO: Look into this error
       pluck('player_id'),
       toArray(),
       tap(res => console.log('player_ids: ', res))
