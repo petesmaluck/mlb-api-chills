@@ -10,8 +10,8 @@ export class GameStatsService {
 
   private mlbGameData: any;
 
-  private ROOT_URL = 'https://statsapi.mlb.com/api/v1/schedule?sportId=1&';
-  private PARAMS = '&hydrate=team(leaders(showOnPreview(leaderCategories=[homeRuns,runsBattedIn,battingAverage],statGroup=[pitching,hitting]))),linescore(matchup,runners),flags,liveLookin,review,broadcasts(all),decisions,person,probablePitcher,stats,homeRuns,previousPlay,game(content(media(featured,epg),summary),tickets),seriesStatus(useOverride=true)&language=en';
+  public ROOT_URL = 'https://statsapi.mlb.com/api/v1/schedule?sportId=1&';
+  public PARAMS = '&hydrate=team(leaders(showOnPreview(leaderCategories=[homeRuns,runsBattedIn,battingAverage],statGroup=[pitching,hitting]))),linescore(matchup,runners),flags,liveLookin,review,broadcasts(all),decisions,person,probablePitcher,stats,homeRuns,previousPlay,game(content(media(featured,epg),summary),tickets),seriesStatus(useOverride=true)&language=en';
 
   constructor(
     private http: HttpDataService
